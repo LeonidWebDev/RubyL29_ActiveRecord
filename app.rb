@@ -3,9 +3,16 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'sinatra/activerecord'
 
+# initialize DB in project
 set :database, 'sqlite3:barbershop.db'
 
+#method table.save is smart (can validate)
 class Client < ActiveRecord::Base
+  # validates pr1(typeSym), pr2(typeHash if pr2 alone can use without { } )
+  validates :name, presense => true
+  validates :phone, presense => true
+  validates :datestamp, presense => true
+  validates :color, presense => true
 end
 
 class Barber < ActiveRecord::Base
@@ -14,10 +21,17 @@ end
 class Contant < ActiveRecord::Base
 end
 
-get '/' do
-  # @barbers = Barber.all
+before '/' do
+  @barbers = Barber.all
   # @barbers = Barber.order 'created_at DESC'     // sorted by time of creating, start with end
+end
+
+get '/' do
   erb :index
+end
+
+get '/barber/:id' do
+  erb "barber personal page"
 end
 
 get '/visit_form' do
@@ -58,6 +72,12 @@ post '/contacts' do
 end   
 
 post '/visit_form' do
+
+  # good way to write field of view from DB
+  # c = Client.new params[:client]
+  # c.save
+  # in view the visit_form must be write input attr name ="client[here name of field in current DB Clients = name, phone, datestamp.. (see field in migrate directory"
+
   @master = params[:master]
   @clientname = params[:clientname]
   @userphone = params[:userphone]
@@ -89,6 +109,8 @@ post '/visit_form' do
   # )
   # c.save
 
+
+  # write to db input fields (lame way)
   c = Client.new
   c.name = @clientname
   c.phone = @userphone
@@ -97,6 +119,13 @@ post '/visit_form' do
   c.color = @color
   c.save
 
-  return erb "<h2>Спасибо, Вы записались</h2>"
-
+  # c.valid?
+  # c.errors.messages  (return { :name => [ok/not ok], :phone => [ok/not ok]...})
+  if c.save
+    erb "<h2>Спасибо, Вы записались</h2>"
+  else
+    @errors = c.errors.full_messages.first # 
+    # erb "<h2>Упс, записаться не получилось, проверьте поля ввода</h2>"
+    erb :visit_form
+  end
 end   
