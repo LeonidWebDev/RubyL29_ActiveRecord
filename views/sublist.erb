@@ -1,0 +1,4 @@
+<h2>Sublist</h2>
+<% @subscribers.each do |subscriber| %>
+    <p><a href="/subscriber/<%= subscriber.id %>"> <%= subscriber.name %></a></p>
+<% end %> 

@@ -30,7 +30,20 @@ get '/' do
   erb :index
 end
 
+get '/sublist' do
+  @subscribers = Client.order("created_at DESC")
+  erb :sublist
+end
+
+get '/subscriber/:id' do
+  # find current client from DB 
+  @subscriber = Client.find(params[:id])
+  erb :subscriber
+end
+
 get '/barber/:id' do
+  # find current barber from DB 
+  @barber = Barber.find(params[:id])
   erb "barber personal page"
 end
 
